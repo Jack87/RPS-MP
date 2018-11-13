@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- CSS Imports -->
+    <link rel="stylesheet" href="./assets/css/cssReset.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css">
+    <link rel="stylesheet" href="./assets/css/bootstrap-toggle.css">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <title>RPS MultiPlayer!</title>
+</head>
+<body class="bg-light">
+
+        <div class = "container pb-5">
+          <div class="jumbotron pb-5">
+            <h1 class="display-3"><img class="logo iconRPS" src="./assets/images/iconRPS.png" alt="RPS Logo">RPS Multi-Player Challenge!</h1>
+            <p class="lead">Lets resolve disbutes the old fashioned way!</p>
+          </div>
+          <section id="display">        
+            <div class="row justify-content-center">
+                <div class="col-6 join">
+                  <form class="input-group" id="joinForm">
+                    <input type="text" class="form-control" id="nameInput" placeholder="Your name">
+                    <span class="input-group-btn">
+                      <button class="btn btn-secondary" id="joinButton" type="submit"><i class="fas fa-sign-in-alt"></i> Join Game</button>
+                    </span>
+                  </form>
+                </div> <!-- join -->
+              </div>
+              <div class="row justify-content-center">
+                <div class="col-6 text-center">
+                  <h4 class="status"></h4>
+                  <!-- Status message. -->
+                </div> <!-- status -->
+              </div>
+              <div class="row">
+                <div class="col-4">
+                  <div class="card player me">
+                    <h4 class="card-header bgp1"><i class="fas fa-user"></i> Waiting for a Player</h4>
+                    <div class="card-body justify-content-center">
+                      <button type="button" class="rock weaponBtn btn btn-outline-secondary m-1 ml-5"  disabled>         <img class="w-75 rock" src="./assets/images/rock.png" alt="Rock">
+                      </button>                      
+                      <button type="button"  class="paper weaponBtn btn btn-outline-secondary m-1 ml-5"  disabled>
+                        <img class="w-75 rock" src="./assets/images/paper.png" alt="Rock"></button>
+                      <button type="button"  class="scissors weaponBtn btn btn-outline-secondary m-1 ml-5" disabled>
+                        <img class="w-75 rock" src="./assets/images/scissors.png" alt="Rock"></button>
+                      </button>
+                      <!-- <p class="card-text"></p> -->
+                    </div>
+                    <div class="card-footer text-muted text-center" id="scorePlayer1">
+                      <!-- Score -->Score: 
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="card result">
+                    <h4 class="card-header bg-warning text-white">Result</h4>
+                    <div class="card-block">
+                      <p class="card-text">
+        
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="card player them">
+                    <h4 class="card-header bgp2"><i class="far fa-user"></i> Waiting for a Player </h4>
+                    <div class="card-body justify-content-center">
+                        <button type="button" class="rock weaponBtn btn btn-outline-secondary m-1 ml-5"  disabled>         <img class="w-75 rock" src="./assets/images/rock.png" alt="Rock">
+                        </button>                      
+                        <button type="button"  class="paper weaponBtn btn btn-outline-secondary m-1 ml-5"  disabled>
+                          <img class="w-75 rock" src="./assets/images/paper.png" alt="Rock"></button>
+                        <button type="button"  class="scissors weaponBtn btn btn-outline-secondary m-1 ml-5" disabled>
+                          <img class="w-75 rock" src="./assets/images/scissors.png" alt="Rock"></button>
+                        </button>
+                      <!-- <p class="card-text"></p> -->
+                    </div>
+                    <div class="card-footer text-muted text-center" id="scorePlayer1">
+                        <!-- Score -->Score: 
+                    </div>
+                  </div>
+                </div>
+              </div> <!-- row -->
+              <div class="row">
+                <div class="col-12 text-center">
+                  <button class="btn btn-danger" id="clearButton">Reset Game</button>
+                </div> <!-- join -->
+              </div>
+
+            <!-- This row will handle all of the retrieved articles -->
+            <div class="row">
+              <div class="col-12">
+                <br>
+                <!-- This card will initially be made up of a card and wells for each of the articles retrieved -->
+                <div class="card">
+                  <!-- card Heading for the retrieved articles box -->
+                  <div class="card-header">
+                    <strong>
+                      <i class="far fa-comments"></i> Trash Talk for the WIN!!</strong>
+                  </div>
+                  <!-- This main card will hold each of the resulting articles -->
+                  <div class="card-body chatLog" id="chatLog">
+                  </div>
+                  <div class="card-footer">
+                      <form class="input-group" id="shoutForm">
+                        <input type="text" id="chatMessage" class="form-control" placeholder="GL HF...">
+                        <span class="input-group-btn">
+                          <button class="chatButton btn btn-secondary" type="submit">Talk!</button>
+                        </span>
+                      </form>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </section>        
+        </div>
+
+        <div class="spacer"></div>
+        <footer class="footer-copyright text-center bg-secondary border-top-2">
+            <div class="wrapper">
+                &copy; Not Copyright 2018 Akop Karapetyan
+            </div>
+        </footer>
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <!-- Game JavaScript -->
+    <script type="text/javascript" src="assets/javascript/app.js"></script>
+  </body>
+</html>
