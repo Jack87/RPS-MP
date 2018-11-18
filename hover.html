@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<style>
+
+/* .slideshow-block, .slides, .slides.active {
+	margin: 0;
+	padding: 0;
+	outline: none;
+	border: none;
+} */
+.slideshow-block{
+  /* float: left; */
+  /* margin:10px; */
+	/* position: relative; */
+	/* width: 150px; */
+	/* height: 150px; */
+	/* overflow: hidden; */
+	background: url('../images/fist.png');
+}
+
+.slides{
+	z-index:0;
+	visibility: hidden;
+}
+.slides.active{
+	visibility: visible;
+}
+
+
+</style>
+<body>
+
+        <button class="slideshow-block">
+                <a href="#" class="link"></a>
+                  <ul class="slides">
+                    <li><a href="https://www.flickr.com/photos/oddsock/100943517" title="Andy Warhol - Marilyn  1967 by Ian Burt, on Flickr"><img class="card-img-top img-fluid w-75 rock" src="../images/rock.png" alt="Rock"></a></li>
+                    <li><a href="https://www.flickr.com/photos/loop_oh/1336594977" title="Mao von Andy Warhol by Rupert Ganzer, on Flickr"><img class="card-img-top img-fluid w-75 paper" src="../images/paper.png" alt="Paper"></a></li>
+                    <li><a href="https://www.flickr.com/photos/rocor/10917802203" title="Andy Warhol by rocor, on Flickr"><img class="card-img-top img-fluid w-75 scissors" src="../images/scissors.png" alt="Scissors"></a></li> 
+                  <ul>
+                  </button>   
+ 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.cycle/3.03/jquery.cycle.all.min.js"></script>
+
+<script>
+
+if (1==1) {
+jQuery(function($){
+
+// Cycle plugin
+$('.slides').cycle({
+    fx:     'none',
+    speed:   150,
+    timeout: 5
+}).cycle("pause");
+
+// Pause &amp; play on hover
+$('.slideshow-block').hover(function(){
+    $(this).find('.slides').addClass('active').cycle('resume');
+}, function(){
+    $(this).find('.slides').removeClass('active').cycle('pause');
+});
+
+});
+};
+</script>
+</html>
