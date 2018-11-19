@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
     <title>Document</title>
 </head>
 <style>
@@ -18,31 +19,36 @@
   /* float: left; */
   /* margin:10px; */
 	/* position: relative; */
-	/* width: 150px; */
+	/* width: 100%; */
 	/* height: 150px; */
 	/* overflow: hidden; */
-	background: url('../images/fist.png');
+    background: white url("../images/fist.png");
+    background-size: cover;
+    background-repeat: no-repeat;
 }
 
 .slides{
+    /* width: 100%; */
+    background: white ;
 	z-index:0;
 	visibility: hidden;
 }
 .slides.active{
+    background: white ;
+
+    /* width: 100%; */
 	visibility: visible;
 }
-
 
 </style>
 <body>
 
         <button class="slideshow-block">
-                <a href="#" class="link"></a>
-                  <ul class="slides">
-                    <li><a href="https://www.flickr.com/photos/oddsock/100943517" title="Andy Warhol - Marilyn  1967 by Ian Burt, on Flickr"><img class="card-img-top img-fluid w-75 rock" src="../images/rock.png" alt="Rock"></a></li>
-                    <li><a href="https://www.flickr.com/photos/loop_oh/1336594977" title="Mao von Andy Warhol by Rupert Ganzer, on Flickr"><img class="card-img-top img-fluid w-75 paper" src="../images/paper.png" alt="Paper"></a></li>
-                    <li><a href="https://www.flickr.com/photos/rocor/10917802203" title="Andy Warhol by rocor, on Flickr"><img class="card-img-top img-fluid w-75 scissors" src="../images/scissors.png" alt="Scissors"></a></li> 
-                  <ul>
+                  <div class="slides">
+                    <img class="card-img-top img-fluid bg-light rock weapon" src="./assets/images/rock.png" alt="Rock">
+                    <img class="card-img-top img-fluid bg-light paper weapon" src="./assets/images/paper.png" alt="Paper">
+                    <img class="card-img-top img-fluid bg-light scissors weapon" src="./assets/images/scissors.png" alt="Scissors"> 
+                  <div>
                   </button>   
  
 
