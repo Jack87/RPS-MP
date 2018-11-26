@@ -249,7 +249,7 @@ $(document).ready(function() {
         var scrollingElement = (document.scrollingElement || document.body);
         scrollingElement.scrollTop = scrollingElement.scrollHeight;
     });
-    $(document).on("mousedown", ".fist", function(){
+    $(document).on("click", ".fist", function(){
         clearTimeout(slideControl);
         var elem = this;
         console.log(elem);
@@ -290,7 +290,7 @@ $(document).ready(function() {
                 };
 
             }        
-        }, 200);
+        }, 111);
     });
 
     $("#chatForm").submit(function(event){
@@ -385,10 +385,16 @@ function enableWeaponButton(player) {
 
 // Reset reset weapon buttons to initial states
 function resetWeaponButton(){
-    $(".fist").removeClass('active');
-    $(".fist img").attr("src", "./assets/images/fist.png").attr("alt", "Fist")
-    $(".fist").attr("data-weapon", "Fist");
+    // $(".fist").removeClass('active');
+    // $(".fist img").attr("src", "./assets/images/fist.png").attr("alt", "Fist")
+    // $(".fist").attr("data-weapon", "Fist");
     // $(".fist").prop("disabled", true);
+    $("#Fist1").removeClass('active');
+    $("#Slide1").attr("src", "./assets/images/fist.png").attr("alt", "Fist");
+    $("#Fist1").attr("data-weapon", "Fist");
+    $("#Fist2").removeClass('active');
+    $("#Slide2").attr("src", "./assets/images/fist.png").attr("alt", "Fist");
+    $("#Fist2").attr("data-weapon", "Fist");
 };
 
 // Update status message
