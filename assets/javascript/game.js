@@ -260,7 +260,7 @@ $(document).ready(function() {
                 var p
                 var weaponChosen = $(elem).data("weapon")
                 console.log(weaponChosen);
-                if ($(elem).attr('name')=="Fist1"){
+                if ($(elem).attr('id')=="Fist1"){
                     p = players.p1
                 } else {
                     p = players.p2
