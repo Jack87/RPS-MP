@@ -42,7 +42,7 @@
           <div class="card player player1">
             <h4 class="card-header bgp1"><i class="fas fa-user"></i> Waiting for a Player</h4>
             <div class="card-body justify-content-center">
-                <button name="Fist1" type="button" class="fist btn btn-outline-secondary btn-block" data-weapon="Fist" disabled><img name="slide1" class="card-img-top img-fluid w-75" src="./assets/images/fist.png" alt="Fist"></button>
+                <button id="Fist1" type="button" class="fist btn btn-outline-secondary btn-block" data-weapon="Fist" disabled><img name="slide1" class="card-img-top img-fluid w-75" src="./assets/images/fist.png" alt="Fist"></button>
             </div>
             <div class="card-footer text-muted text-center" id="scorePlayer1">
               Score: 
@@ -63,9 +63,9 @@
           <div class="card player player2">
             <h4 class="card-header bgp2"><i class="far fa-user"></i> Waiting for a Player </h4>
             <div class="card-body justify-content-center">
-              <button name="Fist2" type="button" class="fist btn btn-outline-secondary btn-block" data-weapon="Fist" disabled><img name="slide2" class="card-img-top img-fluid w-75" src="./assets/images/fist.png" alt="Fist"></button>
+              <button id="Fist2" type="button" class="fist btn btn-outline-secondary btn-block" data-weapon="Fist" disabled><img name="slide2" class="card-img-top img-fluid w-75" src="./assets/images/fist.png" alt="Fist"></button>
             </div>
-            <div class="card-footer text-muted text-center" id="scorePlayer1">
+            <div class="card-footer text-muted text-center" id="scorePlayer2">
                 Score: 
             </div>
           </div>
@@ -88,7 +88,7 @@
             </div>
             <div class="card-body chatLog" id="chatLog"></div> <!-- Conversation goes here -->
             <div class="card-footer">
-              <form class="input-group" id="shoutForm">
+              <form class="input-group" id="chatForm">
                 <input type="text" id="chatMessage" class="form-control" placeholder="GL HF...">
                 <span class="input-group-btn">
                   <button class="chatButton btn btn-secondary" type="submit">Talk!</button>

@@ -93,13 +93,16 @@ database.ref("/game").on("value", function(gameStateStatus) {
             enableWeaponButton(user.role);
             resetFist(".player2 button img", ".player2 button");
           }
-          if (user.role === "player2") {
+          if (user.role === "player2" || user.role == "") {
             statusUpdate(players.p1.name+" is shooting...");
+          }
+          if (user.role === "player2") {
             resetFist(".player1 button img", ".player1 button");
           }
+
           break;
         case 2:
-          if (user.role === "player1") {
+          if (user.role === "player1" || user.role == "") {
             statusUpdate(players.p2.name+" is shooting...");
           }
           if (user.role === "player2") {
@@ -107,6 +110,9 @@ database.ref("/game").on("value", function(gameStateStatus) {
             statusUpdate("Your turn. Choose your weapon!");
             $(".player2 button").css("visibility", "visible");
             enableWeaponButton(user.role);
+          }
+          if (user.role === "") {
+            showP1Choice(weapons.names.indexOf(gameStateStatus.val().p1choice));
           }
           break;
         case 3:
@@ -126,15 +132,24 @@ database.ref("/game").on("value", function(gameStateStatus) {
     }
 });
 
+// Handling Gamestate to stay sync
+var gStateVal = database.ref("/game/gameState");
+gStateVal.on("value", function(snapState) {
+    gameState = snapState.val();
+});
+
 /* ===== Connection handaling and chat. ===== */
 // Chatbox live
-database.ref("/chatbox").orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot){
+database.ref("/chatBox").orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot){
     var output = "<div class='msg'><span class='speaker'>";
     output += snapshot.val().name;
     output += ":</span> <span class='msgContent'>";
     output += snapshot.val().message;
     output += "</span></div>";
     $(".chatLog").append(output);
+
+    var logElement = document.getElementById('chatLog');
+    logElement.scrollTop = logElement.scrollHeight - logElement.clientHeight;
 });
 
 // Handling disconnects
@@ -143,7 +158,6 @@ var connectedRef = database.ref(".info/connected");
 
 connectedRef.on("value", function(snap) {
     if (snap.val()) {
-        
       var con = connectionsRef.push(true);
       console.log(con.onDisconnect())
       user.key = con.key;
@@ -181,6 +195,15 @@ connectionsRef.on("child_removed", function(removedKey) {
 });
 
 $(document).ready(function() {
+    $("#resetButton").click(function(event){
+        event.preventDefault();
+        database.ref().remove()
+        .then(function() {
+          // console.log("Reset succeeded.");
+          location.reload();
+        });
+  
+      });
 
     // Player registration
     $("#joinForm").submit(function(event){
@@ -223,75 +246,101 @@ $(document).ready(function() {
             gameState: gameState
         });
       }
+        var scrollingElement = (document.scrollingElement || document.body);
+        scrollingElement.scrollTop = scrollingElement.scrollHeight;
     });
     $(document).on("mousedown", ".fist", function(){
-        if ($(this).attr("disabled") != "disabled"){
-            console.log($(this).data("weapon") + " was clicked.");
-            clearTimeout(slideControl);
-            var p
-            var weaponChosen = $(this).data("weapon")
-            if ($(this).attr('name')=="Fist1"){
-                p = players.p1
-            } else {
-                p = players.p2
-            }
-            p.weapon = weaponChosen;
-            console.log(p.name + "'s weapon is set to " + p.weapon + ".")
-            $(this).addClass('active');
-            $(this).attr("disabled", true);
-            var parent = $(this).parent().parent();
-            if (parent.hasClass("player1")) {
-                // set turn to 2 for player 2
-                gameState = 2;
-                // store values in db
-                database.ref("/game").update({
-                    p1choice  : weaponChosen,
-                    gameState : gameState
-                });
-                statusUpdate("Your choice is locked in. Waiting on "+players.p2.name+"...");
-            } else {
-                // set turn to 3 for results
-                gameState = 3;
-                database.ref("/game").update({
+        clearTimeout(slideControl);
+        var elem = this;
+        console.log(elem);
+        setTimeout(function(){ 
+            if ($(elem).attr("disabled") != "disabled"){
+                console.log($(elem).data("weapon") + " was clicked.");
+                clearTimeout(slideControl);
+                var p
+                var weaponChosen = $(elem).data("weapon")
+                console.log(weaponChosen);
+                if ($(elem).attr('name')=="Fist1"){
+                    p = players.p1
+                } else {
+                    p = players.p2
+                }
+                p.weapon = weaponChosen;
+                console.log(p.name + "'s weapon is set to " + p.weapon + ".")
+                $(elem).addClass('active');
+                $(elem).attr("disabled", true);
+                var parent = $(elem).parent().parent();
+                if (parent.hasClass("player1")) {
+                    // set turn to 2 for player 2
+                    gameState = 2;
                     // store values in db
-                    p2choice  : weaponChosen,
-                    gameState : gameState
-                });
-            };
+                    database.ref("/game").update({
+                        p1choice  : weaponChosen,
+                        gameState : gameState
+                    });
+                    statusUpdate("Your choice is locked in. Waiting on "+players.p2.name+"...");
+                } else {
+                    // set turn to 3 for results
+                    gameState = 3;
+                    database.ref("/game").update({
+                        // store values in db
+                        p2choice  : weaponChosen,
+                        gameState : gameState
+                    });
+                };
 
-        }
+            }        
+        }, 200);
     });
+
+    $("#chatForm").submit(function(event){
+        event.preventDefault();
+        var message = $("#chatMessage").val().trim();
+        // clear input
+        $("#chatMessage").val("");
+        var chatUser;
+        if(user.role==="player1") {
+          chatUser = players.p1.name;
+        } else if (user.role==="player2") {
+          chatUser = players.p2.name;
+        }
+        database.ref("/chatBox").push({
+          name    : chatUser,
+          message : message
+        });
+    
+      });
 }); // end document ready
 
 /* ========== Functoins ========== */
 // Who won the round?
-function postWinner(p1w, p2w) {
+function  postWinner(p1w, p2w) {
     if (p1w === p2w) {
-      $(".result .card-text").html("It's a tie!");
+      $(".result .card-text").html("<p class='h4 p-1'>It's a tie!</p>");
     } else if ((p1w === "rock" && p2w === "paper") ||
                (p1w === "scissors" && p2w === "rock") ||
                (p1w === "paper" && p2w === "scissors") ){
         if (p2w === "paper") {
-            $(".result .card-text").html("Paper smothers Rock " + players.p2.name + " wins!");
+            $(".result .card-text").html("<p class='h4 p-1'>Paper smothers Rock " + players.p2.name + " wins!</p>");
         } else if (p2w === "rock"){
-            $(".result .card-text").html("Rock Crushes Scissors " + players.p2.name+ " wins!");
+            $(".result .card-text").html("<p class='h4 p-1'>Rock Crushes Scissors " + players.p2.name+ " wins!</p>");
         } else {
-            $(".result .card-text").html("Scissors shred Paper " + players.p2.name+ " wins!");
+            $(".result .card-text").html("<p class='h4 p-1'>Scissors shred Paper " + players.p2.name+ " wins!</p>");
         }
         players.p1.losses++;
         players.p2.wins++;
     } else  {
         if (p1w === "paper") {
-            $(".result .card-text").html("Paper smothers Rock " + players.p1.name + " wins!");
+            $(".result .card-text").html("<p class='h4 p-1'>Paper smothers Rock " + players.p1.name + " wins!</p>");
         } else if (p1w === "rock"){
-            $(".result .card-text").html("Rock Crushes Scissors " + players.p1.name+ " wins!");
+            $(".result .card-text").html("<p class='h4 p-1'>Rock Crushes Scissors " + players.p1.name+ " wins!</p>");
         } else {
-            $(".result .card-text").html("Scissors shred Paper " + players.p1.name+ " wins!");
+            $(".result .card-text").html("<p class='h4 p-1'>Scissors shred Paper " + players.p1.name+ " wins!</p>");
         }
         players.p1.wins++;
         players.p2.losses++;
     };
-
+    showChoices((weapons.names.indexOf(toTitleCase(p1w))), (weapons.names.indexOf(toTitleCase(p2w))));
     $("#scorePlayer1").html("Wins: "+players.p1.wins+" / Losses: "+players.p1.losses);
     $("#scorePlayer2").html("Wins: "+players.p2.wins+" / Losses: "+players.p2.losses);
     database.ref("/players/1").update({
@@ -312,6 +361,17 @@ function resetFist(wImage, wButton) {
     $(wButton).prop("disabled", true);
 }
 
+function showP1Choice(p1w) {
+    document.slide1.src = weapons.images[p1w];
+    document.slide1.alt = weapons.names[p1w];
+}
+function showChoices(p1w, p2w){
+    document.slide1.src = weapons.images[p1w];
+    document.slide1.alt = weapons.names[p1w];
+    document.slide2.src = weapons.images[p2w];
+    document.slide2.alt = weapons.names[p2w];
+}
+
 // Disable player choices
 function disableChoices(player) {
     $(player).prop("disabled", true);
@@ -326,7 +386,8 @@ function enableWeaponButton(player) {
 // Reset reset weapon buttons to initial states
 function resetWeaponButton(){
     $(".fist").removeClass('active');
-    $(".fist").attr("src", "./assets/images/fist.png").attr("alt", "Fist")
+    $(".fist img").attr("src", "./assets/images/fist.png").attr("alt", "Fist")
+    $(".fist").attr("data-weapon", "Fist");
     // $(".fist").prop("disabled", true);
 };
 
@@ -340,9 +401,26 @@ function toTitleCase(str)
 {
   return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
+// Reset the round (not the entire game)
+function resetRound() {
+    gameState = 1;
+    players.p1.weapon = "Fist"
+    players.p2.weapon = "Fist"
+    database.ref("/game").update({
+        gameState : gameState,
+        p1choice  : "",
+        p2choice  : ""
+    });
+    resetWeaponButton();
+    clearResults();
+  }
+
+// Clear results card
+function clearResults() {$(".result .card-text").html("")};
+
 /*========================================*/
 function cycleWeapon() {
-    if (gameState == 0 && user.role == "player1") {
+    if (gameState == 1 && user.role == "player1") {
         document.slide1.src = weapons.images[i];
         document.slide1.alt = weapons.names[i];
         $("#Fist1").attr("data-weapon", weapons.names[i]);
@@ -352,7 +430,7 @@ function cycleWeapon() {
             i = 0;
         }
         slideControl = setTimeout("cycleWeapon()", speed);
-    } else if (gameState == 1 && user.role == "player2") {
+    } else if (gameState == 2 && user.role == "player2") {
         document.slide2.src = weapons.images[i];
         document.slide2.alt = weapons.names[i];
         $("#Fist2").attr("data-weapon", weapons.names[i]);
@@ -363,15 +441,6 @@ function cycleWeapon() {
         }
         slideControl = setTimeout("cycleWeapon()", speed);
     }
-    // document.slide1.src = weapons.images[i];
-    // document.slide1.alt = weapons.names[i];
-    // $("#Fist1").attr("data-weapon", weapons.names[i]);
-    // if (i < weapons.images.length - 1) {
-    //     i++;
-    // } else {
-    //     i = 0;
-    // }
-    // slideControl = setTimeout("cycleWeapon()", speed);
 }
 // Pause & play on hover
 $('.fist').hover(function(){
@@ -380,19 +449,15 @@ $('.fist').hover(function(){
     };
 }, function(){
     if ($(this).attr("disabled") != "disabled"){
-        document.slide.src = "./assets/images/fist.png";
-        document.slide.alt = "Fist";
-        $(".fist").attr("data-weapon", "Fist");
-        clearTimeout(slideControl);
-        if (gameState == 0 && user.role == "player1") {
+        if (gameState == 1 && user.role == "player1") {
             document.slide1.src = "./assets/images/fist.png";
             document.slide1.alt = "Fist";
-            $(".fist").attr("data-weapon", "Fist");
+            $("#Fist1").attr("data-weapon", "Fist");
             clearTimeout(slideControl);
-        } else if (gameState == 1 && user.role == "player2") {
+        } else if (gameState == 2 && user.role == "player2") {
             document.slide2.src = "./assets/images/fist.png";
             document.slide2.alt = "Fist";
-            $(".fist").attr("data-weapon", "Fist");
+            $("#Fist2").attr("data-weapon", "Fist");
             clearTimeout(slideControl);
         }
     };
