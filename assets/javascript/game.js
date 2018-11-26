@@ -195,6 +195,7 @@ connectionsRef.on("child_removed", function(removedKey) {
 });
 
 $(document).ready(function() {
+    //Reset button for debugging and clearing DB data
     $("#resetButton").click(function(event){
         event.preventDefault();
         database.ref().remove()
@@ -202,7 +203,6 @@ $(document).ready(function() {
           // console.log("Reset succeeded.");
           location.reload();
         });
-  
       });
 
     // Player registration
@@ -250,15 +250,15 @@ $(document).ready(function() {
         scrollingElement.scrollTop = scrollingElement.scrollHeight;
     });
     $(document).on("click", ".fist", function(){
-        clearTimeout(slideControl);
+        // clearTimeout(slideControl);
         var elem = this;
         console.log(elem);
-        setTimeout(function(){ 
+        // setTimeout(function(){ 
             if ($(elem).attr("disabled") != "disabled"){
-                console.log($(elem).data("weapon") + " was clicked.");
+                console.log(elem.dataset.weapon + " was clicked.");
                 clearTimeout(slideControl);
                 var p
-                var weaponChosen = $(elem).data("weapon")
+                var weaponChosen = elem.dataset.weapon
                 console.log(weaponChosen);
                 if ($(elem).attr('id')=="Fist1"){
                     p = players.p1
@@ -288,9 +288,8 @@ $(document).ready(function() {
                         gameState : gameState
                     });
                 };
-
-            }        
-        }, 111);
+            };         
+        // }, 111);
     });
 
     $("#chatForm").submit(function(event){
