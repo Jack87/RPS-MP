@@ -1,17 +1,19 @@
 var players = {
     p1 : {
         id:     "",
-        name:   "Jack",
+        name:   "",
         wins:   0,
         losses: 0,
-        weapon: "Fist"
+        weapon: "Fist",
+        key: ""
     },
     p2 : {
         id:     "",
-        name:   "Catalina",
+        name:   "",
         wins:   0,
         losses: 0,
-        weapon: "Fist"
+        weapon: "Fist",
+        key: ""
     },
     activeSpectators: [],
     totalConnections: 0
@@ -21,7 +23,7 @@ var user = {
     key:  ""
 };
 // Turns and rounds
-var turn = 0;
+var gameState = 0;
 var round = 1;
 var totalRounds = 5;
 // Weapons object
@@ -29,7 +31,7 @@ var weapons = {
     images: ["./assets/images/rock.png", "./assets/images/paper.png", "./assets/images/scissors.png"],
     names: ["Rock", "Paper", "Scissors"]
 };
-var speed = 500;
+var speed = 400;
 var i = 0;
 var slideControl
 
@@ -45,13 +47,35 @@ var config = {
   firebase.initializeApp(config);
   var database = firebase.database();
 
+//Players already playing?
+database.ref("/players").on("value", function(snapshot) {
+    if (snapshot.child("1/name").exists()) {
+        // save to global var
+        players.p1.name = snapshot.child("1/name").val();
+        // render to DOM
+        $(".player1 h4").html(players.p1.name);
+        // save connection keys
+        players.p1.key = snapshot.child("1/key").val();
+    }
+    if (snapshot.child("2/name").exists() && snapshot.child("1/name").exists()) {
+        // save to global var
+        players.p2.name = snapshot.child("2/name").val();
+        // render to DOM
+        $(".player2 h4").html(players.p2.name);
+        // save connection keys
+        players.p2.key = snapshot.child("2/key").val();
+        // hide input but maintain height
+        $("#joinForm").hide();
+    }
+});
+  
 
 // Switch statment determins case to use depending on game state from DB
 // gameState = 0, new game with no players
 // gameState = 1, player one's turn
 // gameState = 2, player two's turn
 // gameState = 3, results
-/* database.ref("/game").on("value", function(gameStateStatus) {
+database.ref("/game").on("value", function(gameStateStatus) {
     if(gameStateStatus.child("gameState").exists()) {
       switch (gameStateStatus.val().gameState) {
         case 0:
@@ -59,7 +83,7 @@ var config = {
           break;
         case 1:
           // show chatbox
-          $(".chatbox").slideDown();
+          $(".chatLog").slideDown();
           // reset player choices
           resetWeaponButton();
           // enable player1 buttons
@@ -100,7 +124,7 @@ var config = {
           break;
       } // end switch
     }
-}); */
+});
 
 /* ===== Connection handaling and chat. ===== */
 // Chatbox live
@@ -112,56 +136,47 @@ database.ref("/chatbox").orderByChild("dateAdded").limitToLast(1).on("child_adde
     output += "</span></div>";
     $(".chatLog").append(output);
 });
+
 // Handling disconnects
-// connectionsRef references a specific location in our database.
-// All of our connections will be stored in this directory.
 var connectionsRef = database.ref("/connections");
 var connectedRef = database.ref(".info/connected");
 
-// When the client's connection state changes...
 connectedRef.on("value", function(snap) {
-    // console.log("Current user role: "+user.role);
-    // If they are connected..
     if (snap.val()) {
-      // Add user to the connections list.
+        
       var con = connectionsRef.push(true);
-      // set local user key to connection key
+      console.log(con.onDisconnect())
       user.key = con.key;
-      // Remove user from the connection list when they disconnect.
       con.onDisconnect().remove();
     }
 });
 
-// When first loaded or when the connections list changes...
 connectionsRef.on("value", function(snap) {
-    // Display the viewer count in the html.
-    // The number of online users is the number of children in the connections list.
     $("#watchers").html("Current users: " + snap.numChildren());
 });
 
-connectionsRef.on("child_removed", function(removed) {
+connectionsRef.on("child_removed", function(removedKey) {
     // if the key of removed child matches one of the players, remove them
-    if (removed.key === p1key) {
-      status(players.p1.name + " disconnected!");
-      // clear on db
-      database.ref("/players/1").remove();
-      // clear locally so new player can be added
-      players.p1.name = "";
-      if(user.role!=="player2") {
-        $("#joinForm").show();
-      }
-      user.role = "";
-      resetRound();
-    } else if(removed.key === p2key) {
-      status(players.p2.name + " disconnected!");
-      database.ref("/players/2").remove();
-      // clear locally so new player can be added
-      players.p2.name = "";
-      if(user.role!=="player1") {
-        $("#joinForm").show();
-      }
-      user.role = "";
-      resetRound();
+    if (removedKey.key === players.p1.key) {
+        statusUpdate(players.p1.name + " disconnected!");
+        database.ref("/players/1").remove();
+        // clear locally so new player can be added
+        players.p1.name = "";
+        if(user.role!=="player2") {
+            $("#joinForm").show();
+            user.role = "";
+        }
+        resetRound();
+    } else if(removedKey.key === players.p2.key) {
+        statusUpdate(players.p2.name + " disconnected!");
+        database.ref("/players/2").remove();
+        // clear locally so new player can be added
+        players.p2.name = "";
+        if(user.role!=="player1") {
+            $("#joinForm").show();
+            user.role = "";
+        }
+        resetRound();
     }
 });
 
@@ -173,25 +188,20 @@ $(document).ready(function() {
       event.preventDefault();
       if (players.p1.name==="") {
         players.p1.name = toTitleCase($("#nameInput").val().trim());
-        // set user global variable to player 1
-        user.role = "player1";
-  
-        // write name to DOM
+        user.role = "player1";  
         $(".player1 h4").html('<i class="fas fa-user"></i> ' + players.p1.name);
         statusUpdate("Hi, "+players.p1.name+"! You're player 1. Waiting for another player to join.");
-        // write player name to db
+        // write to db
         database.ref("/players/1").update({
           key   : user.key,
           name  : players.p1.name,
           wins  : players.p1.wins,
           losses: players.p1.losses
         });
-        //
-        turn = 0;
+        gameState = 0;
         database.ref("/game").update({
-          gameState: turn
+            gameState: gameState
         });
-  
         $(this).hide();
       } else if (players.p2.name===""){
         players.p2.name = toTitleCase($("#nameInput").val().trim());
@@ -206,16 +216,53 @@ $(document).ready(function() {
           wins  : players.p2.wins,
           losses: players.p2.losses
         });
-        status("Hey, "+players.p2.name+"! You're player 2. Waiting for "+players.p1.name+" to make a move.");
+        statusUpdate("Hey, "+players.p2.name+"! You're player 2. Waiting for "+players.p1.name+" to make a move.");
         // start game by storing turn in database
-        turn = 1;
+        gameState = 1;
         database.ref("/game").update({
-          turn: turn
+            gameState: gameState
         });
       }
-      // console.log(user.role);
+    });
+    $(document).on("mousedown", ".fist", function(){
+        if ($(this).attr("disabled") != "disabled"){
+            console.log($(this).data("weapon") + " was clicked.");
+            clearTimeout(slideControl);
+            var p
+            var weaponChosen = $(this).data("weapon")
+            if ($(this).attr('name')=="Fist1"){
+                p = players.p1
+            } else {
+                p = players.p2
+            }
+            p.weapon = weaponChosen;
+            console.log(p.name + "'s weapon is set to " + p.weapon + ".")
+            $(this).addClass('active');
+            $(this).attr("disabled", true);
+            var parent = $(this).parent().parent();
+            if (parent.hasClass("player1")) {
+                // set turn to 2 for player 2
+                gameState = 2;
+                // store values in db
+                database.ref("/game").update({
+                    p1choice  : weaponChosen,
+                    gameState : gameState
+                });
+                statusUpdate("Your choice is locked in. Waiting on "+players.p2.name+"...");
+            } else {
+                // set turn to 3 for results
+                gameState = 3;
+                database.ref("/game").update({
+                    // store values in db
+                    p2choice  : weaponChosen,
+                    gameState : gameState
+                });
+            };
+
+        }
     });
 }); // end document ready
+
 /* ========== Functoins ========== */
 // Who won the round?
 function postWinner(p1w, p2w) {
@@ -265,6 +312,12 @@ function resetFist(wImage, wButton) {
     $(wButton).prop("disabled", true);
 }
 
+// Disable player choices
+function disableChoices(player) {
+    $(player).prop("disabled", true);
+    $(player).siblings().prop("disabled", true);
+  }
+
 // Enable player weapon button
 function enableWeaponButton(player) {
     $("." + player + " button").prop("disabled", false);
@@ -282,17 +335,43 @@ function statusUpdate(msg) {
     $(".status").html(msg);
 };
 
+//Title Case a string
+function toTitleCase(str)
+{
+  return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
 /*========================================*/
 function cycleWeapon() {
-    document.slide.src = weapons.images[i];
-    document.slide.alt = weapons.names[i];
-    $(".fist").attr("data-weapon", weapons.names[i]);
-    if (i < weapons.images.length - 1) {
-        i++;
-    } else {
-        i = 0;
+    if (gameState == 0 && user.role == "player1") {
+        document.slide1.src = weapons.images[i];
+        document.slide1.alt = weapons.names[i];
+        $("#Fist1").attr("data-weapon", weapons.names[i]);
+        if (i < weapons.images.length - 1) {
+            i++;
+        } else {
+            i = 0;
+        }
+        slideControl = setTimeout("cycleWeapon()", speed);
+    } else if (gameState == 1 && user.role == "player2") {
+        document.slide2.src = weapons.images[i];
+        document.slide2.alt = weapons.names[i];
+        $("#Fist2").attr("data-weapon", weapons.names[i]);
+        if (i < weapons.images.length - 1) {
+            i++;
+        } else {
+            i = 0;
+        }
+        slideControl = setTimeout("cycleWeapon()", speed);
     }
-    slideControl = setTimeout("cycleWeapon()", speed);
+    // document.slide1.src = weapons.images[i];
+    // document.slide1.alt = weapons.names[i];
+    // $("#Fist1").attr("data-weapon", weapons.names[i]);
+    // if (i < weapons.images.length - 1) {
+    //     i++;
+    // } else {
+    //     i = 0;
+    // }
+    // slideControl = setTimeout("cycleWeapon()", speed);
 }
 // Pause & play on hover
 $('.fist').hover(function(){
@@ -305,23 +384,19 @@ $('.fist').hover(function(){
         document.slide.alt = "Fist";
         $(".fist").attr("data-weapon", "Fist");
         clearTimeout(slideControl);
-    };
-});
-
-
-$(document).on("mousedown", ".fist", function(){
-    if ($(this).attr("disabled") != "disabled"){
-        console.log($(this).data("weapon") + " was clicked.");
-        clearTimeout(slideControl);
-        var p
-        var weaponChosen = $(this).data("weapon")
-        if ($(this).attr('name')=="Fist1"){
-            p = players.p1
-        } else {
-            p = players.p2
+        if (gameState == 0 && user.role == "player1") {
+            document.slide1.src = "./assets/images/fist.png";
+            document.slide1.alt = "Fist";
+            $(".fist").attr("data-weapon", "Fist");
+            clearTimeout(slideControl);
+        } else if (gameState == 1 && user.role == "player2") {
+            document.slide2.src = "./assets/images/fist.png";
+            document.slide2.alt = "Fist";
+            $(".fist").attr("data-weapon", "Fist");
+            clearTimeout(slideControl);
         }
-        p.weapon = weaponChosen;
-        console.log(p.name + "'s weapon is set to " + p.weapon + ".")
-        $(this).attr("disabled", true);
-    }
+    };
+    
 });
+
+

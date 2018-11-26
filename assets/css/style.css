@@ -23,6 +23,7 @@ body{
     }
 }
 .chatLog{
+    display: none;
     height: 10rem;
     overflow-y: auto;
     vertical-align: bottom; 
@@ -41,9 +42,7 @@ footer {
 .status {
     margin: 1rem 0 2rem 0; 
 }
-/* .card button {
-    visibility: hidden; 
-} */
+
 .player1 .btn-secondary.active {
     background-color: #29B6F6;
     color: #ffffff; }
